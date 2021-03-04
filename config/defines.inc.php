@@ -46,6 +46,10 @@ if (!defined('_PS_MODE_DEMO_')) {
     define('_PS_MODE_DEMO_', false);
 }
 
+if (!defined('_PS_ADDONS_DISABLED_')) {
+    define('_PS_ADDONS_DISABLED_', false);
+}
+
 $currentDir = dirname(__FILE__);
 
 if (!defined('_PS_HOST_MODE_') && (getenv('_PS_HOST_MODE_') || getenv('REDIRECT__PS_HOST_MODE_'))) {

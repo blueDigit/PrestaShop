@@ -294,6 +294,9 @@ class ModuleManager implements AddonManagerInterface
         if (!empty($source)) {
             $this->moduleZipManager->storeInModulesFolder($source);
         } elseif (!$this->moduleProvider->isOnDisk($name)) {
+            if (_PS_ADDONS_DISABLED_) {
+                throw new Exception($this->translator->trans('Module not found on disk.', [], 'Admin.Modules.Notification'));
+            }
             $this->moduleUpdater->setModuleOnDiskFromAddons($name);
         }
 
@@ -363,11 +366,13 @@ class ModuleManager implements AddonManagerInterface
         // 1- From source
         if ($source != null) {
             $this->moduleZipManager->storeInModulesFolder($source);
-        } elseif ($module->canBeUpgradedFromAddons()) {
+        } elseif (! _PS_ADDONS_DISABLED_ && $module->canBeUpgradedFromAddons()) {
             // 2- From Addons
             // This step is not mandatory (in case of local module),
             // we do not check the result
             $this->moduleUpdater->setModuleOnDiskFromAddons($name);
+        } elseif (! $module->canBeUpgraded()) {
+            return true;
         }
 
         // Load and execute upgrade files
