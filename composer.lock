@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "59789cac67e25b35069b440c08f670f2",
+    "content-hash": "3a786b0b6b5e8abc927aaa299204e2c3",
     "packages": [
         {
             "name": "beberlei/doctrineextensions",
@@ -6117,50 +6117,6 @@
                 "source": "https://github.com/PrestaShop/TranslationToolsBundle/tree/v4.0.4"
             },
             "time": "2020-11-13T08:11:44+00:00"
-        },
-        {
-            "name": "prestashop/welcome",
-            "version": "v6.0.4",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/PrestaShop/welcome.git",
-                "reference": "2634da35dec6c52a8c3a18dfcf051dbbb6b48edc"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/PrestaShop/welcome/zipball/2634da35dec6c52a8c3a18dfcf051dbbb6b48edc",
-                "reference": "2634da35dec6c52a8c3a18dfcf051dbbb6b48edc",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.4"
-            },
-            "require-dev": {
-                "prestashop/php-dev-tools": "^3.4"
-            },
-            "type": "prestashop-module",
-            "autoload": {
-                "psr-4": {
-                    "OnBoarding\\": "OnBoarding/"
-                },
-                "exclude-from-classmap": []
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "AFL-3.0"
-            ],
-            "authors": [
-                {
-                    "name": "PrestaShop SA",
-                    "email": "contact@prestashop.com"
-                }
-            ],
-            "description": "Welcome module for PrestaShop helping the users to create products.",
-            "homepage": "https://github.com/PrestaShop/welcome",
-            "support": {
-                "source": "https://github.com/PrestaShop/welcome/tree/v6.0.4"
-            },
-            "time": "2020-12-03T15:11:16+00:00"
         },
         {
             "name": "psr/cache",
