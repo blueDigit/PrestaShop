@@ -32,7 +32,9 @@ framework:
 
     #esi:             ~
     secret:          "%secret%"
-    translator:      { fallbacks: ["default"] }
+    translator:
+      fallbacks: ["default"]
+      logging: !php/const:_PS_TRANSLATOR_LOGGING_
     router:
         resource: "%kernel.root_dir%/config/routing.yml"
         strict_requirements: ~
