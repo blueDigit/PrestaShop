@@ -3451,7 +3451,7 @@ exit;
             $env = _PS_ENV_;
         }
 
-        $dir = _PS_ROOT_DIR_ . '/var/cache/' . $env . '/';
+        $dir = _PS_CACHE_ROOT_DIR_ . '/' . $env . '/';
 
         register_shutdown_function(function () use ($dir) {
             $fs = new Filesystem();

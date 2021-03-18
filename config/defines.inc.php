@@ -71,6 +71,10 @@ if (defined('_PS_ADMIN_DIR_')) {
     define('_PS_BO_ALL_THEMES_DIR_', _PS_ADMIN_DIR_.'/themes/');
 }
 
+if (!defined('_PS_CACHE_ROOT_DIR_')) {
+    define('_PS_CACHE_ROOT_DIR_', _PS_ROOT_DIR_.'/var/cache');
+}
+
 // Find if we are running under a Symfony command
 $cliEnvValue = null;
 if (isset($argv) && is_array($argv)) {
@@ -90,7 +94,7 @@ if ((defined('_PS_IN_TEST_') && _PS_IN_TEST_)
 }
 
 if (!defined('_PS_CACHE_DIR_')) {
-    define('_PS_CACHE_DIR_', _PS_ROOT_DIR_.'/var/cache/' . _PS_ENV_ . DIRECTORY_SEPARATOR);
+    define('_PS_CACHE_DIR_', _PS_CACHE_ROOT_DIR_.'/' . _PS_ENV_ . DIRECTORY_SEPARATOR);
 }
 
 define('_PS_CONFIG_DIR_', _PS_CORE_DIR_.'/config/');
