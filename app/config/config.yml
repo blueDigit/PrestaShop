@@ -36,6 +36,7 @@ framework:
     translator:
         fallbacks: ["default"]
         paths: "%modules_translation_paths%"
+        logging: !php/const:_PS_TRANSLATOR_LOGGING_
     router:
         resource: "%kernel.root_dir%/config/routing.yml"
         strict_requirements: ~
