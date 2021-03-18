@@ -100,6 +100,10 @@ if (!defined('_PS_CACHE_DIR_')) {
 if (!defined('_PS_LOG_DIR_')) {
     define('_PS_LOG_DIR_', _PS_ROOT_DIR_.'/var/logs');
 }
+if (!defined('_PS_TRANSLATOR_LOGGING_')) {
+    define('_PS_TRANSLATOR_LOGGING_', false);
+}
+
 define('_PS_CONFIG_DIR_', _PS_CORE_DIR_.'/config/');
 define('_PS_CUSTOM_CONFIG_FILE_', _PS_CONFIG_DIR_.'settings_custom.inc.php');
 define('_PS_CLASS_DIR_', _PS_CORE_DIR_.'/classes/');
