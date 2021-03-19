@@ -28,11 +28,6 @@ use PrestaShop\PrestaShop\Core\Session\SessionHandler;
 
 $currentDir = dirname(__FILE__);
 
-/* Custom defines made by users */
-if (is_file($currentDir . '/defines_custom.inc.php')) {
-    include_once $currentDir . '/defines_custom.inc.php';
-}
-
 require_once $currentDir . '/defines.inc.php';
 
 require_once _PS_CONFIG_DIR_ . 'autoload.php';

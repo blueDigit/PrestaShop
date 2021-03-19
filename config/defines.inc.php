@@ -24,6 +24,11 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
 
+/* Custom defines made by users */
+if (is_file(__DIR__ . '/defines_custom.inc.php')) {
+    include __DIR__ . '/defines_custom.inc.php';
+}
+
 /* Debug only */
 if (!defined('_PS_MODE_DEV_')) {
     define('_PS_MODE_DEV_', true);
