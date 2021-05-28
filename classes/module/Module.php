@@ -2553,6 +2553,11 @@ abstract class ModuleCore implements ModuleInterface
     public function isCached($template, $cache_id = null, $compile_id = null)
     {
         Tools::enableCache();
+
+        if ($compile_id === null) {
+            $compile_id = Context::getContext()->shop->theme->getName();
+        }
+
         if (false === strpos($template, 'module:') && !file_exists(_PS_ROOT_DIR_ . '/' . $template)) {
             $template = $this->getTemplatePath($template);
         }
