@@ -363,7 +363,7 @@ class MailCore extends ObjectModel
                  *
                  * @see https://github.com/swiftmailer/swiftmailer/issues/866
                  */
-                $connection = new Swift_SendmailTransport();
+                $connection = new Swift_SendmailTransport(_PS_SENDMAIL_COMMAND_);
             }
 
             if (!$connection) {
