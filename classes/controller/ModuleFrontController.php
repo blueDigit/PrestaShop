@@ -62,6 +62,15 @@ class ModuleFrontControllerCore extends FrontController
         }
     }
 
+    public function getTemplateFile($template, $params = [], $locale = null)
+    {
+        if (strpos($template, 'module:') === 0) {
+            return $template;
+        }
+
+        return parent::getTemplateFile($template, $params, $locale);
+    }
+
     public function initContent()
     {
         if (Tools::isSubmit('module') && Tools::getValue('controller') == 'payment') {
