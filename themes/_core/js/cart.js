@@ -122,7 +122,8 @@ $(document).ready(() => {
               linkAction: 'add-to-cart',
               cart: resp.cart
             },
-            resp: resp
+            resp: resp,
+            event
           });
         }).fail((resp) => {
           prestashop.emit('handleError', {eventType: 'addProductToCart', resp: resp});
@@ -155,7 +156,7 @@ $(document).ready(() => {
         }
 
         // Refresh cart preview
-        prestashop.emit('updateCart', {reason: event.target.dataset, resp: resp});
+        prestashop.emit('updateCart', {reason: event.target.dataset, resp: resp, event});
       }).fail((resp) => {
         prestashop.emit('handleError', {eventType: 'updateCart', resp: resp});
       })
