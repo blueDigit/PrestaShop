@@ -44,6 +44,8 @@ $(document).ready(() => {
       };
     }
 
+    prestashop.emit('updateCart.begin', event || {});
+
     $.post(getCartViewUrl, requestData).then((resp) => {
       $('.cart-detailed-totals').replaceWith(resp.cart_detailed_totals);
       $('.cart-summary-items-subtotal').replaceWith(resp.cart_summary_items_subtotal);
@@ -66,8 +68,10 @@ $(document).ready(() => {
         refreshCheckoutPage();
       }
 
+      prestashop.emit('updateCart.end', event || {});
       prestashop.emit('updatedCart', {eventType: 'updateCart', resp: resp});
     }).fail((resp) => {
+      prestashop.emit('updateCart.end', event || {});
       prestashop.emit('handleError', {eventType: 'updateCart', resp: resp})
     });
   });
@@ -113,7 +117,10 @@ $(document).ready(() => {
           return;
         }
 
+        prestashop.emit('addToCart.begin', {event});
+
         $.post(actionURL, query, null, 'json').then((resp) => {
+          prestashop.emit('addToCart.end', {event});
           prestashop.emit('updateCart', {
             reason: {
               idProduct: resp.id_product,
@@ -126,6 +133,7 @@ $(document).ready(() => {
             event
           });
         }).fail((resp) => {
+          prestashop.emit('addToCart.end', {event});
           prestashop.emit('handleError', {eventType: 'addProductToCart', resp: resp});
         });
       }
@@ -148,7 +156,11 @@ $(document).ready(() => {
         $addVoucherForm.append($('<input>', {'type': 'hidden', 'name': 'action', "value": "update"}));
       }
 
+      prestashop.emit('addVoucher.begin', {event});
+
       $.post(getCartViewUrl, $addVoucherForm.serialize(), null, 'json').then((resp) => {
+        prestashop.emit('addVoucher.end', {event});
+
         if (resp.hasError) {
           $('.js-error').show().find('.js-error-text').text(resp.errors[0]);
 
@@ -158,6 +170,7 @@ $(document).ready(() => {
         // Refresh cart preview
         prestashop.emit('updateCart', {reason: event.target.dataset, resp: resp, event});
       }).fail((resp) => {
+        prestashop.emit('addVoucher.end', {event});
         prestashop.emit('handleError', {eventType: 'updateCart', resp: resp});
       })
     }
