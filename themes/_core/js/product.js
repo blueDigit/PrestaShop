@@ -204,16 +204,47 @@ function updateProduct(event, eventType, context, updateUrl) {
       success(data, textStatus, errorThrown) {
         // Avoid image to blink each time we modify the product quantity
         // Can not compare directly cause of HTML comments in data.
-        const $newImagesContainer = $('<div>')
-          .html(data.product_cover_thumbnails)
-          .find('.images-container');
+        (() => {
+          const $newImagesContainer = $('<div>')
+            .html(data.product_cover_thumbnails)
+            .find('.images-container');
 
-        const $oldImagesContainer = $('.images-container', context);
+          const $oldImagesContainer = $('.images-container', context);
 
-        // Used to avoid image blinking if same image = epileptic friendly
-        if ($oldImagesContainer.html() !== $newImagesContainer.html()) {
-          $oldImagesContainer.replaceWith($newImagesContainer);
-        }
+          // Used to avoid image blinking if same image = epileptic friendly
+          if ((() => {
+            const getImages = ($container) => {
+              const images = [];
+
+              $container.find('img').each((_imageIndex, imageElement) => {
+                images.push(
+                  $(imageElement).attr('src') !== undefined
+                    ? $(imageElement).attr('src')
+                    : $(imageElement).attr('data-src')
+                );
+              });
+
+              return images;
+            };
+
+            const oldImages = getImages($oldImagesContainer);
+            const newImages = getImages($newImagesContainer);
+
+            if (oldImages.length !== newImages.length) {
+              return true;
+            }
+
+            for (let i = 0; i < oldImages.length; i += 1) {
+              if (oldImages[i] !== newImages[i]) {
+                return true;
+              }
+            }
+
+            return false;
+          })()) {
+            $oldImagesContainer.replaceWith($newImagesContainer);
+          }
+        })();
 
         $('.product-prices', context).replaceWith(
           $('<div>').html(data.product_prices).find('.product-prices'),
