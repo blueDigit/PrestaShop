@@ -4,8 +4,32 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f711e7c3fa7e009f2206da82ec96dba7",
+    "content-hash": "3c1736eba36067bab3e9d169ae11b8b9",
     "packages": [
+        {
+            "name": "bdprestashop-module/ps_searchbarjqauto",
+            "version": "dev-bd-1.0",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:blueDigit/PrestaShop_Module_Ps_Searchbarjqauto.git",
+                "reference": "f78fba31378fd8c186a2488ea4072e1b0437b143"
+            },
+            "default-branch": true,
+            "type": "prestashop-module",
+            "time": "2021-08-26T04:31:18+00:00"
+        },
+        {
+            "name": "bdprestashop-theme/classic-rocket",
+            "version": "dev-bd-1.7.7",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:blueDigit/PrestaShop_Theme_ClassicRocket.git",
+                "reference": "c8c26295a0dac444bdea41880b6ae4a367183d75"
+            },
+            "default-branch": true,
+            "type": "prestashop-theme",
+            "time": "2021-08-30T00:41:39+00:00"
+        },
         {
             "name": "beberlei/doctrineextensions",
             "version": "v1.2.6",
@@ -10206,6 +10230,8 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
+        "bdprestashop-module/ps_searchbarjqauto": 20,
+        "bdprestashop-theme/classic-rocket": 20,
         "csa/guzzle-bundle": 20,
         "cssjanus/cssjanus": 20,
         "phake/phake": 0

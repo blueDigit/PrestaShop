@@ -12,6 +12,8 @@
         "ext-intl": "*",
         "ext-json": "*",
         "ext-zip": "*",
+        "bdprestashop-module/ps_searchbarjqauto": "dev-bd-1.0",
+        "bdprestashop-theme/classic-rocket": "dev-bd-1.7.7",
         "beberlei/doctrineextensions": "^1.0",
         "composer/ca-bundle": "^1.0",
         "composer/installers": "^1.0.21",
@@ -130,6 +132,14 @@
             "type": "vcs",
             "url": "https://github.com/PrestaShop/CsaGuzzleBundle",
             "canonical": false
+        },
+        {
+            "type": "git",
+            "url": "git@github.com:blueDigit/PrestaShop_Module_Ps_Searchbarjqauto.git"
+        },
+        {
+            "type": "git",
+            "url": "git@github.com:blueDigit/PrestaShop_Theme_ClassicRocket.git"
         }
     ],
     "require-dev": {
