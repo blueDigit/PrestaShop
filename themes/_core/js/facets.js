@@ -30,17 +30,20 @@ function updateResults (data) {
     pendingQuery = false;
     prestashop.emit('updateProductList', data);
     window.history.pushState(data, document.title, data.current_url);
+    prestashop.emit('updateFacets.end');
 }
 
 function handleError () {
     // TODO: feedback
     pendingQuery = false;
+    prestashop.emit('updateFacets.end');
 }
 
 function makeQuery (url) {
     if (pendingQuery) {
         // wait for current results
     } else {
+        prestashop.emit('updateFacets.begin');
 
         // We need to add a parameter to the URL
         // to make it different from the one we're on,
