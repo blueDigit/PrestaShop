@@ -149,7 +149,7 @@ class AdminProductWrapper
         } else {
             // Value is displayed tax included but must be saved tax excluded
             $combinationValues['attribute_ecotax'] = Tools::ps_round(
-                $combinationValues['attribute_ecotax'] / (1 + Tax::getProductEcotaxRate() / 100),
+                str_replace(',', '.', $combinationValues['attribute_ecotax']) / (1 + Tax::getProductEcotaxRate() / 100),
                 $computingPrecision
             );
         }
