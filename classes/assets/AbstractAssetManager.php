@@ -59,8 +59,11 @@ abstract class AbstractAssetManagerCore
     {
         foreach ($this->getDirectories() as $baseDir) {
             $fullPath = $baseDir . ltrim($relativePath, '/'); // not DIRECTORY_SEPARATOR because, it's path included manually
-            if (file_exists($this->getPathFromUri($fullPath))) {
-                return $fullPath;
+            if (file_exists($path = $this->getPathFromUri($fullPath))) {
+                if (filesize($path) > 0) {
+                    return $fullPath;
+                }
+                break;
             }
         }
 
