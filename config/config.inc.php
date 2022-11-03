@@ -255,10 +255,6 @@ if (!defined('_PS_ADMIN_DIR_')) {
             $context->cookie->logout();
         } else {
             $customer->logged = true;
-            if ($customer->id_lang != $context->language->id) {
-                $customer->id_lang = $context->language->id;
-                $customer->update();
-            }
         }
     }
 

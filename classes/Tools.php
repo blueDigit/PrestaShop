@@ -661,6 +661,15 @@ class ToolsCore
             }
         }
 
+        if (
+            !defined('_PS_ADMIN_DIR_')
+            && $context->customer->logged
+            && $context->customer->id_lang != $context->language->id
+        ) {
+            $context->customer->id_lang = $context->language->id;
+            $context->customer->update();
+        }
+
         Tools::setCookieLanguage($context->cookie);
     }
 
