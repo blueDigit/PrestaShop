@@ -661,6 +661,9 @@ class ProductLazyArray extends AbstractLazyArray
         // Get filtered product images matching the specified id_product_attribute
         $this->product['images'] = $this->filterImagesForCombination($productImages, $product['id_product_attribute']);
 
+        // We retrieve all images, so why not provide them all?
+        $this->product['all_images'] = $productImages;
+
         // Get default image for selected combination (used for product page, cart details, ...)
         $this->product['default_image'] = reset($this->product['images']);
         foreach ($this->product['images'] as $image) {
