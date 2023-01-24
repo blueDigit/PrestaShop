@@ -30,9 +30,12 @@ let currentRequest = null;
 function updateResults(data) {
   prestashop.emit('updateProductList', data);
   window.history.pushState(data, document.title, data.current_url);
+  prestashop.emit('updateFacets.end');
 }
 
 function handleError(xhr, textStatus) {
+  prestashop.emit('updateFacets.end');
+
   if (textStatus === 'abort') {
     return false;
   }
@@ -49,6 +52,8 @@ function cleanRequest(xhr) {
 function makeQuery(url) {
   if (currentRequest) {
     currentRequest.abort();
+  } else {
+    prestashop.emit('updateFacets.begin');
   }
 
   // We need to add a parameter to the URL

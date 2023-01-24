@@ -44,6 +44,8 @@ $(document).ready(() => {
       };
     }
 
+    prestashop.emit('updateCart.begin', event || {});
+
     $.post(getCartViewUrl, requestData)
       .then((resp) => {
         $(prestashop.selectors.cart.detailedTotals).replaceWith(
@@ -85,9 +87,11 @@ $(document).ready(() => {
           refreshCheckoutPage();
         }
 
+        prestashop.emit('updateCart.end', event || {});
         prestashop.emit('updatedCart', {eventType: 'updateCart', resp});
       })
       .fail((resp) => {
+        prestashop.emit('updateCart.end', event || {});
         prestashop.emit('handleError', {eventType: 'updateCart', resp});
       });
   });
@@ -140,8 +144,11 @@ $(document).ready(() => {
       return;
     }
 
+    prestashop.emit('addToCart.begin', {event});
+
     $.post(actionURL, query, null, 'json')
       .then((resp) => {
+        prestashop.emit('addToCart.end', {event});
         prestashop.emit('updateCart', {
           reason: {
             idProduct: resp.id_product,
@@ -155,6 +162,7 @@ $(document).ready(() => {
         });
       })
       .fail((resp) => {
+        prestashop.emit('addToCart.end', {event});
         prestashop.emit('handleError', {
           eventType: 'addProductToCart',
           resp,
@@ -184,8 +192,12 @@ $(document).ready(() => {
       );
     }
 
+    prestashop.emit('addVoucher.begin', {event});
+
     $.post(getCartViewUrl, $addVoucherForm.serialize(), null, 'json')
       .then((resp) => {
+        prestashop.emit('addVoucher.end', {event});
+
         if (resp.hasError) {
           $('.js-error')
             .show()
@@ -203,6 +215,7 @@ $(document).ready(() => {
         });
       })
       .fail((resp) => {
+        prestashop.emit('addVoucher.end', {event});
         prestashop.emit('handleError', {eventType: 'updateCart', resp});
       });
   });
