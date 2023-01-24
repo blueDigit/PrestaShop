@@ -26,11 +26,9 @@ import prestashop from 'prestashop';
 import $ from 'jquery';
 
 prestashop.selectors = {
-  quantityWanted: '#quantity_wanted',
+  quantityWanted: '#quantity_wanted, .quantity-wanted',
   product: {
-    imageContainer:
-      // eslint-disable-next-line
-      '.quickview .images-container, .page-product:not(.modal-open) .row .images-container, .page-product:not(.modal-open) .product-container .images-container, .quickview .js-images-container, .page-product:not(.modal-open) .row .js-images-container, .page-product:not(.modal-open) .product-container .js-images-container',
+    imageContainer: '.images-container, .js-images-container',
     container: '.product-container, .js-product-container',
     availability: '#product-availability, .js-product-availability',
     actions: '.product-actions, .js-product-actions',
@@ -38,25 +36,18 @@ prestashop.selectors = {
     refresh: '.product-refresh, .js-product-refresh',
     miniature: '.js-product-miniature',
     minimalQuantity: '.product-minimal-quantity, .js-product-minimal-quantity',
-    /* eslint-disable */
-    addToCart:
-      '.quickview .product-add-to-cart, .page-product:not(.modal-open) .row .product-add-to-cart, .page-product:not(.modal-open) .product-container .product-add-to-cart, .quickview .js-product-add-to-cart, .page-product:not(.modal-open) .row .js-product-add-to-cart, .page-product:not(.modal-open) .product-container .js-product-add-to-cart',
-    prices:
-      '.quickview .product-prices, .page-product:not(.modal-open) .row .product-prices, .page-product:not(.modal-open) .product-container .product-prices, .quickview .js-product-prices, .page-product:not(.modal-open) .row .js-product-prices, .page-product:not(.modal-open) .product-container .js-product-prices',
+    addToCart: '.product-add-to-cart, .js-product-add-to-cart',
+    prices: '.product-prices, .js-product-prices',
     inputCustomization:
       '.product-actions input[name="id_customization"], .js-product-actions .js-product-customization-id',
-    customization:
-      '.quickview .product-customization, .page-product:not(.modal-open) .row .product-customization, .page-product:not(.modal-open) .product-container .product-customization, .quickview .js-product-customization, .page-product:not(.modal-open) .row .js-product-customization, .page-product:not(.modal-open) .product-container .js-product-customization',
-    variantsUpdate:
-      '.quickview .product-variants, .page-product:not(.modal-open) .row .product-variants, .page-product:not(.modal-open) .product-container .product-variants, .quickview .js-product-variants, .page-product:not(.modal-open) .row .js-product-variants, .page-product:not(.modal-open) .js-product-container .js-product-variants',
-    discounts:
-      '.quickview .product-discounts, .page-product:not(.modal-open) .row .product-discounts, .page-product:not(.modal-open) .product-container .product-discounts, .quickview .js-product-discounts, .page-product:not(.modal-open) .row .js-product-discounts, .page-product:not(.modal-open) .product-container .js-product-discounts',
-    additionalInfos:
-      '.quickview .product-additional-info, .page-product:not(.modal-open) .row .product-additional-info, .page-product:not(.modal-open) .product-container .product-additional-info, .quickview .js-product-additional-info, .page-product:not(.modal-open) .row .js-product-additional-info, .page-product:not(.modal-open) .js-product-container .js-product-additional-info',
-    details: '.quickview #product-details, #product-details, .quickview .js-product-details, .js-product-details',
-    flags:
-      '.quickview .product-flags, .page-product:not(.modal-open) .row .product-flags, .page-product:not(.modal-open) .product-container .product-flags, .quickview .js-product-flags, .page-product:not(.modal-open) .row .js-product-flags, .page-product:not(.modal-open) .js-product-container .js-product-flags',
-    /* eslint-enable */
+    customization: '.product-customization, .js-product-customization',
+    variantsUpdate: '.product-variants, .js-product-variants',
+    discounts: '.product-discounts, .js-product-discounts',
+    additionalInfos: '.product-additional-info, .js-product-additional-info',
+    details: '#product-details, .product-details, .js-product-details',
+    flags: '.product-flags, .js-product-flags',
+    context: '.js-product-miniature, .js-product-quickview, .js-product-details',
+    quickviewContext: '.quickview, .js-product-miniature, .js-product-quickview',
   },
   listing: {
     quickview: '.quick-view, .js-quick-view',
