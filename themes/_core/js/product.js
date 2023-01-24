@@ -63,6 +63,8 @@ function getProductUpdateUrl(event, eventType, context) {
     formData[v.name] = v.value;
   });
 
+  prestashop.emit('updateProduct.begin', {event, eventType, context});
+
   $.ajax({
     url: $productActions.find('form:first').attr('action'),
     method: 'POST',
@@ -84,6 +86,9 @@ function getProductUpdateUrl(event, eventType, context) {
         textStatus,
         errorThrown,
       });
+    },
+    complete() {
+      prestashop.emit('updateProduct.end', {event, eventType, context});
     },
   });
 
@@ -159,6 +164,7 @@ function updateProduct(event, eventType, context, updateUrl) {
 
   if (currentRequest.delayId) {
     clearTimeout(currentRequest.delayId);
+    prestashop.emit('updateProduct.end', {event, eventType, context});
   }
 
   // Most update need to occur (almost) instantly, but in some cases (like keyboard actions)
@@ -169,8 +175,12 @@ function updateProduct(event, eventType, context, updateUrl) {
     updateDelay = 750;
   }
 
+  prestashop.emit('updateProduct.begin', {event, eventType, context});
+
   currentRequest.delayId = setTimeout(() => {
     if (formSerialized === '') {
+      prestashop.emit('updateProduct.end', {event, eventType, context});
+
       return;
     }
 
@@ -196,6 +206,7 @@ function updateProduct(event, eventType, context, updateUrl) {
       beforeSend() {
         if (currentRequest.request !== null) {
           currentRequest.request.abort();
+          prestashop.emit('updateProduct.end', {event, eventType, context});
         }
       },
       error(jqXHR, textStatus) {
@@ -278,6 +289,7 @@ function updateProduct(event, eventType, context, updateUrl) {
       complete() {
         currentRequest.request = null;
         currentRequest.delayId = null;
+        prestashop.emit('updateProduct.end', {event, eventType, context});
       },
     });
   }, updateDelay);
