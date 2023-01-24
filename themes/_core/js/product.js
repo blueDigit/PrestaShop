@@ -220,21 +220,48 @@ function updateProduct(event, eventType, context, updateUrl) {
       success(data) {
         // Avoid image to blink each time we modify the product quantity
         // Can not compare directly cause of HTML comments in data.
-        const $newImagesContainer = $('<div>').append(
-          data.product_cover_thumbnails,
-        );
+        (() => {
+          const $newImagesContainer = $('<div>')
+            .html(data.product_cover_thumbnails)
+            .find(prestashop.selectors.product.imageContainer);
 
-        // Used to avoid image blinking if same image = epileptic friendly
-        if (
-          $(prestashop.selectors.product.imageContainer, context).html()
-          !== $newImagesContainer
-            .find(prestashop.selectors.product.imageContainer)
-            .html()
-        ) {
-          $(prestashop.selectors.product.imageContainer, context).replaceWith(
-            data.product_cover_thumbnails,
-          );
-        }
+          const $oldImagesContainer = $(prestashop.selectors.product.imageContainer, context);
+
+          // Used to avoid image blinking if same image = epileptic friendly
+          if ((() => {
+            const getImages = ($container) => {
+              const images = [];
+
+              $container.find('img').each((imageIndex, imageElement) => {
+                images.push(
+                  $(imageElement).attr('src') !== undefined
+                    ? $(imageElement).attr('src')
+                    : $(imageElement).attr('data-src'),
+                );
+              });
+
+              return images;
+            };
+
+            const oldImages = getImages($oldImagesContainer);
+            const newImages = getImages($newImagesContainer);
+
+            if (oldImages.length !== newImages.length) {
+              return true;
+            }
+
+            for (let i = 0; i < oldImages.length; i += 1) {
+              if (oldImages[i] !== newImages[i]) {
+                return true;
+              }
+            }
+
+            return false;
+          })()) {
+            $oldImagesContainer.replaceWith($newImagesContainer);
+          }
+        })();
+
         $(prestashop.selectors.product.prices, context)
           .first()
           .replaceWith(data.product_prices);
