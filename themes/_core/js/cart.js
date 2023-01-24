@@ -151,6 +151,7 @@ $(document).ready(() => {
             cart: resp.cart,
           },
           resp,
+          event,
         });
       })
       .fail((resp) => {
@@ -198,6 +199,7 @@ $(document).ready(() => {
         prestashop.emit('updateCart', {
           reason: event.target.dataset,
           resp,
+          event,
         });
       })
       .fail((resp) => {
