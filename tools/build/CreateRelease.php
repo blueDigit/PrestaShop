@@ -58,6 +58,18 @@ $releaseOptions = [
         'description' => 'Do not put the installer in the release. Interesting if release will be upload remotly by FTP or for public release. Default: false.',
         'longopt' => 'no-installer',
     ],
+    'admin-dirname' => [
+        'description' => 'Admin dirname',
+        'longopt' => 'admin-dirname:',
+    ],
+    'install-dirname' => [
+        'description' => 'Install dirname',
+        'longopt' => 'install-dirname:',
+    ],
+    'prepare-for-git' => [
+        'description' => 'Prepare the release for deploying with git. Default: false.',
+        'longopt' => 'prepare-for-git',
+    ],
     'help' => [
         'description' => 'Show help',
         'opt' => 'h',
@@ -101,7 +113,10 @@ foreach ($releaseOptions as $optionName => $option) {
     }
 }
 $destinationDir = '';
+$adminDirname = 'admin';
+$installDirname = 'install';
 $useZip = $useInstaller = true;
+$prepareForGit = false;
 
 if (isset($userOptions['version'])) {
     $version = $userOptions['version'];
@@ -117,12 +132,24 @@ if (isset($userOptions['destination-dir'])) {
     $destinationDir = $userOptions['destination-dir'];
 }
 
+if (isset($userOptions['admin-dirname'])) {
+    $adminDirname = $userOptions['admin-dirname'];
+}
+
+if (isset($userOptions['install-dirname'])) {
+    $installDirname = $userOptions['install-dirname'];
+}
+
 if (isset($userOptions['no-installer'])) {
     $useInstaller = false;
 }
 
+if (isset($userOptions['prepare-for-git'])) {
+    $prepareForGit = true;
+}
+
 try {
-    $releaseCreator = new ReleaseCreator($version, $useInstaller, $useZip, $destinationDir);
+    $releaseCreator = new ReleaseCreator($version, $useInstaller, $useZip, $destinationDir, $adminDirname, $installDirname, $prepareForGit);
     $releaseCreator->createRelease();
 } catch (Exception $e) {
     $consoleWrite->displayText(
