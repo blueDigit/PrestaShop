@@ -99,6 +99,7 @@ class ReleaseCreator
         'travis\-scripts$',
         'CONTRIBUTING\.md$',
         'composer\.json$',
+        'composer\.lock$',
         'diff\-hooks\.php',
         '((?<!_dev\/)package\.json)$',
         '(.*)?\.composer$',
@@ -143,6 +144,8 @@ class ReleaseCreator
         'docker-compose\.yml$',
         'tools/assets$',
         '\.webpack$',
+        'modules/[^/]+/_release$',
+        'themes/[^/]+/_release$',
     ];
 
     /**
@@ -203,6 +206,27 @@ class ReleaseCreator
     protected $destinationDir;
 
     /**
+     * Admin dirname.
+     *
+     * @var string
+     */
+    protected $adminDirname;
+
+    /**
+     * Install dirname.
+     *
+     * @var string
+     */
+    protected $installDirname;
+
+    /**
+     * Do we prepare for git?
+     *
+     * @var bool
+     */
+    protected $prepareForGit;
+
+    /**
      * Set the release wanted version, and some options.
      *
      * @param string $version
@@ -210,7 +234,7 @@ class ReleaseCreator
      * @param bool $useZip
      * @param string $destinationDir
      */
-    public function __construct($version = null, $useInstaller = true, $useZip = true, $destinationDir = '')
+    public function __construct($version = null, $useInstaller = true, $useZip = true, $destinationDir = '', $adminDirname = 'admin', $installDirname = 'install', $prepareForGit = false)
     {
         $this->consoleWriter = new ConsoleWriter();
         $tmpDir = sys_get_temp_dir();
@@ -238,6 +262,10 @@ class ReleaseCreator
             "--- Destination dir used will be '{$this->destinationDir}'{$this->lineSeparator}",
             ConsoleWriter::COLOR_GREEN
         );
+
+        $this->adminDirname = $adminDirname;
+        $this->installDirname = $installDirname;
+
         $this->useZip = $useZip;
         $this->useInstaller = $useInstaller;
 
@@ -254,6 +282,14 @@ class ReleaseCreator
         } elseif ($this->useInstaller) {
             $this->consoleWriter->displayText(
                 "--- Release will have the installer.{$this->lineSeparator}",
+                ConsoleWriter::COLOR_GREEN
+            );
+        }
+
+        $this->prepareForGit = $prepareForGit;
+        if ($this->prepareForGit) {
+            $this->consoleWriter->displayText(
+                "--- Release will be prepared for deploying with git.{$this->lineSeparator}",
                 ConsoleWriter::COLOR_GREEN
             );
         }
@@ -281,6 +317,10 @@ class ReleaseCreator
             ->generateLicensesFile()
             ->runComposerInstall()
             ->runBuildAssets()
+            ->runBuildModules('build')
+            ->runBuildThemes('build')
+            ->runBuildModules('clean')
+            ->runBuildThemes('clean')
             ->createPackage();
         $endTime = date('H:i:s');
         $this->consoleWriter->displayText(
@@ -546,6 +586,70 @@ class ReleaseCreator
     }
 
     /**
+     * Build modules.
+     *
+     * @return $this
+     * @throws BuildException
+     */
+    protected function runBuildModules($action = 'build')
+    {
+        $this->consoleWriter->displayText("Running {$action} modules...", ConsoleWriter::COLOR_YELLOW);
+
+        foreach (new FilesystemIterator("{$this->tempProjectPath}/modules") as $file) {
+            if (
+                $file->isDir()
+                && file_exists("{$file->getPathname()}/_release/{$action}")
+            ) {
+                $path = escapeshellarg($file->getPathname());
+
+                $command = "cd {$path} && ./_release/{$action} 2>&1";
+                exec($command, $output, $returnCode);
+
+                if ($returnCode !== 0) {
+                    throw new BuildException("Unable to {$action} module {$file->getPathname()}.");
+                }
+            }
+        }
+
+        $this->consoleWriter->displayText(" DONE{$this->lineSeparator}", ConsoleWriter::COLOR_GREEN);
+
+        return $this;
+    }
+
+    /**
+     * Build themes.
+     *
+     * @return $this
+     * @throws BuildException
+     */
+    protected function runBuildThemes($action = 'build')
+    {
+        $this->consoleWriter->displayText("Running {$action} themes...", ConsoleWriter::COLOR_YELLOW);
+
+        foreach (new FilesystemIterator("{$this->tempProjectPath}/themes") as $file) {
+            if (
+                $file->isDir()
+                && substr($file->getBasename(), 0, 1) != '_'
+                && !in_array($file->getBasename(), ['classic', 'node_modules'])
+                && file_exists("{$file->getPathname()}/_release/{$action}")
+            ) {
+                $path = escapeshellarg($file->getPathname());
+
+                $command = "cd {$path} && ./_release/{$action} 2>&1";
+                exec($command, $output, $returnCode);
+
+                if ($returnCode !== 0) {
+                    throw new BuildException("Unable to {$action} theme {$file->getPathname()}.");
+                }
+            }
+        }
+
+        $this->consoleWriter->displayText(" DONE{$this->lineSeparator}", ConsoleWriter::COLOR_GREEN);
+
+        return $this;
+    }
+
+    /**
      * Create some required folders and rename a few.
      *
      * @return $this
@@ -560,7 +664,7 @@ class ReleaseCreator
         if (!file_exists($this->tempProjectPath . '/var/logs/')) {
             mkdir($this->tempProjectPath . '/var/logs', 0777, true);
         }
-        $itemsToRename = ['admin-dev' => 'admin', 'install-dev' => 'install'];
+        $itemsToRename = ['admin-dev' => $this->adminDirname, 'install-dev' => $this->installDirname];
         $basePath = $this->tempProjectPath;
 
         foreach ($itemsToRename as $oldName => $newName) {
@@ -610,9 +714,76 @@ class ReleaseCreator
             $this->patternsRemoveList,
             $this->tempProjectPath
         );
+        $this->prepareForGit($this->tempProjectPath, $this->filesList);
         $this->consoleWriter->displayText(" DONE{$this->lineSeparator}", ConsoleWriter::COLOR_GREEN);
 
         return $this;
+    }
+
+    /**
+     * Prepare for git
+     *
+     * @throws BuildException
+     */
+    protected function prepareForGit($currentPath, array &$filesList)
+    {
+        $isEmpty = true;
+        $gitkeepId = null;
+        $gitignoreId = null;
+        $deployignoreId = null;
+
+        $gitkeepFile = $currentPath.'/.gitkeep';
+        $gitignoreFile = $currentPath.'/.gitignore';
+        $deployignoreFile = $currentPath.'/.deployignore';
+
+        foreach ($filesList as $key => $value) {
+            $isEmpty = false;
+            if (!is_string($value)) {
+                $this->prepareForGit($key, $filesList[$key]);
+                continue;
+            }
+            if (null === $gitkeepId && $value === $gitkeepFile) {
+                $gitkeepId = $key;
+            }
+            if (null === $gitignoreId && $value === $gitignoreFile) {
+                $gitignoreId = $key;
+            }
+            if (null === $deployignoreId && $value === $deployignoreFile) {
+                $deployignoreId = $key;
+            }
+        }
+
+        if ($this->prepareForGit && $isEmpty) {
+            if (false === file_put_contents($gitkeepFile, '')) {
+                throw new BuildException('Unable to create file '.$gitkeepFile.'.');
+            }
+            if (null === $gitkeepId) {
+                $filesList[] = $gitkeepFile;
+            }
+        }
+
+        if (!$isEmpty && null !== $deployignoreId) {
+            if ($this->prepareForGit) {
+                if (false === ($ignoreContent = file_get_contents($deployignoreFile))) {
+                    throw new BuildException('Unable to read file '.$deployignoreFile.'.');
+                }
+                $ignoreContent = str_replace(
+                    ['[ADMIN_DIRNAME]', '[INSTALL_DIRNAME]'],
+                    [$this->adminDirname, $this->installDirname],
+                    $ignoreContent
+                );
+                if (false === file_put_contents($gitignoreFile, $ignoreContent)) {
+                    throw new BuildException('Unable to write file '.$gitignoreFile.'.');
+                }
+                if (null === $gitignoreId) {
+                    $filesList[] = $gitignoreFile;
+                }
+            }
+            if (!unlink($deployignoreFile)) {
+                throw new BuildException('Unable to delete file '.$deployignoreFile.'.');
+            }
+            unset($filesList[$deployignoreId]);
+        }
     }
 
     /**
@@ -679,7 +850,7 @@ class ReleaseCreator
                 throw new BuildException("Trying to delete a file somewhere else than in $tmpDir, path: $pathToTest");
             }
 
-            if (is_numeric($key)) {
+            if (is_string($value)) {
                 $argValue = escapeshellarg($value);
 
                 // Remove files.
@@ -853,7 +1024,7 @@ class ReleaseCreator
         $subCount = substr_count($this->tempProjectPath, DIRECTORY_SEPARATOR);
 
         foreach ($files as $key => $value) {
-            if (is_numeric($key)) {
+            if (is_string($value)) {
                 $md5 = md5_file($value);
                 $count = substr_count($value, DIRECTORY_SEPARATOR) - $subCount + 1;
                 $file_name = str_replace($this->tempProjectPath, null, $value);
