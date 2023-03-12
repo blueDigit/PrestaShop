@@ -128,6 +128,8 @@ class PDFCore
      */
     public function render($display = true)
     {
+        Context::getContext()->forceShopTranslatorUse = true;
+
         $render = false;
         $this->pdf_renderer->setFontForLang(Context::getContext()->language->iso_code);
         foreach ($this->objects as $object) {
@@ -162,7 +164,13 @@ class PDFCore
                 ob_clean();
             }
 
-            return $this->pdf_renderer->render($this->filename, $display);
+            $renderedPdf = $this->pdf_renderer->render($this->filename, $display);
+        }
+
+        Context::getContext()->forceShopTranslatorUse = false;
+
+        if ($render) {
+            return $renderedPdf;
         }
     }
 

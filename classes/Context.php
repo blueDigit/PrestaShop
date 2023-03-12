@@ -82,6 +82,9 @@ class ContextCore
     /** @var Currency|null */
     public $currency;
 
+    /** @var bool */
+    public $forceShopTranslatorUse = false;
+
     /**
      * Current locale instance.
      *
@@ -109,6 +112,9 @@ class ContextCore
 
     /** @var Translator */
     protected $translator = null;
+
+    /** @var Translator */
+    protected $shopTranslator = null;
 
     /** @var int */
     protected $priceComputingPrecision = null;
@@ -388,15 +394,24 @@ class ContextCore
      */
     public function getTranslator($isInstaller = false)
     {
-        if (null !== $this->translator && $this->language->locale === $this->translator->getLocale()) {
-            return $this->translator;
+        $translatorProp = $this->forceShopTranslatorUse ? 'shopTranslator' : 'translator';
+
+        if (null !== $this->$translatorProp && $this->language->locale === $this->$translatorProp->getLocale()) {
+            return $this->$translatorProp;
         }
 
         $sfContainer = SymfonyContainer::getInstance();
 
-        if ($isInstaller || null === $sfContainer) {
+        if ($this->forceShopTranslatorUse || $isInstaller || null === $sfContainer) {
+            $adminContext = !$this->forceShopTranslatorUse && defined('_PS_ADMIN_DIR_');
             // symfony's container isn't available in front office, so we load and configure the translator component
-            $this->translator = $this->getTranslatorFromLocale($this->language->locale);
+            $translator = $this->getTranslatorFromLocale($this->language->locale, $adminContext);
+            if ($isInstaller || null === $sfContainer) {
+                $this->translator = $translator;
+            }
+            if (!$adminContext) {
+                $this->shopTranslator = $translator;
+            }
         } else {
             $this->translator = $sfContainer->get('translator');
             // We need to set the locale here because in legacy BO pages, the translator is used
@@ -404,7 +419,7 @@ class ContextCore
             $this->translator->setLocale($this->language->locale);
         }
 
-        return $this->translator;
+        return $this->$translatorProp;
     }
 
     /**
@@ -414,7 +429,7 @@ class ContextCore
      *
      * @return Translator
      */
-    public function getTranslatorFromLocale($locale)
+    public function getTranslatorFromLocale($locale, $adminContext = null)
     {
         $cacheDir = _PS_CACHE_DIR_ . 'translations';
         $translator = new Translator($locale, null, $cacheDir, false);
@@ -438,7 +453,7 @@ class ContextCore
 
         $translator->clearLanguage($locale);
 
-        $adminContext = defined('_PS_ADMIN_DIR_');
+        $adminContext = $adminContext ?? defined('_PS_ADMIN_DIR_');
         // Do not load DB translations when $this->language is InstallLanguage
         // because it means that we're looking for the installer translations, so we're not yet connected to the DB
         $withDB = !$this->language instanceof InstallLanguage;
