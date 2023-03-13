@@ -57,11 +57,6 @@ class ModulesInstallerCommand extends ContainerAwareCommand
     protected $moduleRepository;
 
     /**
-     * @var \PrestaShop\PrestaShop\Core\Addon\Module\ModuleManager
-     */
-    protected $moduleManager;
-
-    /**
      * @var \Symfony\Component\Console\Input\Input
      */
     protected $input;
@@ -71,12 +66,27 @@ class ModulesInstallerCommand extends ContainerAwareCommand
      */
     protected $output;
 
+    /**
+     * @var string
+     */
+    protected $consolePath;
+
     protected function configure()
     {
         $this
             ->setName('prestashop:install:modules')
             ->setDescription('Syncronize modules with modules.json')
-            ->addArgument('action', InputArgument::REQUIRED, sprintf('Action to execute (Allowed actions: %s).', implode(' / ', $this->allowedActions)));
+            ->addArgument(
+                'action',
+                InputArgument::REQUIRED,
+                sprintf('Action to execute (Allowed actions: %s).',
+                implode(' / ', $this->allowedActions))
+            )
+            ->addArgument(
+                'module name',
+                InputArgument::OPTIONAL,
+                'Module on which the action will be executed'
+            );
     }
 
     protected function init(InputInterface $input, OutputInterface $output)
@@ -84,9 +94,9 @@ class ModulesInstallerCommand extends ContainerAwareCommand
         $this->formatter = $this->getHelper('formatter');
         $this->translator = $this->getContainer()->get('translator');
         $this->moduleRepository = $this->getContainer()->get('prestashop.core.admin.module.repository');
-        $this->moduleManager = $this->getContainer()->get('prestashop.module.manager');
         $this->input = $input;
         $this->output = $output;
+        $this->consolePath = dirname(dirname(dirname(__DIR__))).'/bin/console';
         /** @var LegacyContext $legacyContext */
         $legacyContext = $this->getContainer()->get('prestashop.adapter.legacy.context');
         //We need to have an employee or the module hooks don't work
@@ -102,6 +112,7 @@ class ModulesInstallerCommand extends ContainerAwareCommand
         $this->init($input, $output);
 
         $action = $input->getArgument('action');
+        $moduleName = $input->getArgument('module name');
 
         if (!in_array($action, $this->allowedActions)) {
             $this->displayMessage(
@@ -113,34 +124,75 @@ class ModulesInstallerCommand extends ContainerAwareCommand
                 'error'
             );
 
-            return;
+            return 1;
+        }
+
+        if (null !== $moduleName) {
+            return $this->executeModuleAction($action, $moduleName);
         }
 
         if ('uninstall' == $action) {
-            $this->executeUninstallAction();
-        } else {
-            $this->executeGenericAction($action);
+            return $this->executeUninstallAction();
         }
+
+        return $this->executeGenericAction($action);
     }
 
     protected function executeGenericAction($action)
     {
         if (false !== ($moduleList = $this->getModuleList())) {
             foreach ($moduleList as $moduleName) {
-                $this->moduleAction($action, $moduleName);
+                if (!$this->moduleAction($action, $moduleName)) {
+                    return 1;
+                }
             }
         }
+
+        $this->clearCache();
+
+        return 0;
     }
 
     protected function executeUninstallAction()
     {
         if (false !== ($moduleList = $this->getModuleList())) {
             foreach ($this->moduleRepository->getInstalledModules() as $module) {
-                if (! in_array($module->get('name'), $moduleList)) {
-                    $this->moduleAction('uninstall', $module->get('name'));
+                if (
+                    !in_array($module->get('name'), $moduleList)
+                    && !$this->moduleAction('uninstall', $module->get('name'))
+                ) {
+                    return 1;
                 }
             }
         }
+
+        $this->clearCache();
+
+        return 0;
+    }
+
+    protected function executeModuleAction($action, $moduleName)
+    {
+        /**
+         * @var ModuleManager
+         */
+        $moduleManager = $this
+            ->getContainer()
+            ->get('prestashop.module.manager')
+            ->setActionParams([
+                'cacheClearEnabled' => false,
+            ])
+        ;
+
+        if (!$moduleManager->{$action}($moduleName)) {
+            $this->output->writeln(strip_tags(html_entity_decode(
+                $moduleManager->getError($moduleName)
+            )));
+        
+            return 1;
+        }
+        
+        return 0;
     }
 
     protected function moduleAction($action, $moduleName)
@@ -173,18 +225,19 @@ class ModulesInstallerCommand extends ContainerAwareCommand
 
         $this->displayMessage($message.'...');
 
-        if ($this->moduleManager->{$action}($moduleName)) {
-            return;
+        exec(
+            'php '.escapeshellarg($this->consolePath).' prestashop:install:modules '.$action.' '.escapeshellarg($moduleName),
+            $output,
+            $returnCode
+        );
+
+        if ($returnCode !== 0) {
+            $this->displayMessage($output, 'error');
+
+            return false;
         }
 
-        $this->displayMessage(
-            $this->translator->trans(
-                'Error: %error_details%',
-                ['%error_details%' => $this->moduleManager->getError($moduleName)],
-                'Admin.Modules.Notification'
-            ),
-            'error'
-        );
+        return true;
     }
 
     protected function getModuleList()
@@ -210,5 +263,14 @@ class ModulesInstallerCommand extends ContainerAwareCommand
         $this->output->writeln(
             $this->formatter->formatBlock($message, $type, 'error' === $type)
         );
+    }
+
+    protected function clearCache()
+    {
+        $this
+            ->getContainer()
+            ->get('prestashop.adapter.cache.clearer.symfony_cache_clearer')
+            ->clear()
+        ;
     }
 }
