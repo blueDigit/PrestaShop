@@ -397,7 +397,7 @@ function findContext(element) {
 
   if (!$context || $context.length === 0) {
     $context = $(
-      '.quickview, .page-product:not(.modal-open) .row, .page-product:not(.modal-open) .product-container',
+      '.quickview, .page-product:not(.modal-open) .product-container',
     );
   }
 
