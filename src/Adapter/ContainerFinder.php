@@ -28,6 +28,7 @@ namespace PrestaShop\PrestaShop\Adapter;
 
 use Context;
 use Controller;
+use AdminLegacyLayoutControllerCore;
 use PrestaShop\PrestaShop\Core\Exception\ContainerNotFoundException;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -64,6 +65,7 @@ class ContainerFinder
         }
         if (isset($this->context->controller)
             && $this->context->controller instanceof Controller
+            && !$this->context->controller instanceof AdminLegacyLayoutControllerCore
             && ($container = $this->context->controller->getContainer())
             && null !== $container
         ) {
