@@ -79,6 +79,8 @@ class ReleaseCreator
         'package-lock.json',
         '.babelrc',
         'postcss.config.js',
+        'composer.json',
+        'composer.lock',
     ];
 
     /**
@@ -98,8 +100,6 @@ class ReleaseCreator
         'tools/contrib$',
         'travis\-scripts$',
         'CONTRIBUTING\.md$',
-        'composer\.json$',
-        'composer\.lock$',
         'diff\-hooks\.php',
         '((?<!_dev\/)package\.json)$',
         '(.*)?\.composer$',
@@ -904,7 +904,7 @@ class ReleaseCreator
                         continue 2;
                     }
                 }
-                $this->removeUnnecessaryFiles($filesList[$key], $filesRemoveList, $foldersRemoveList, $patternsRemoveList, $folder);
+                $this->removeUnnecessaryFiles($filesList[$key], $filesRemoveList, $foldersRemoveList, $patternsRemoveList, $key);
             }
         }
 
