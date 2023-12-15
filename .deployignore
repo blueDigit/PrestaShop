@@ -105,7 +105,8 @@
 /modules/*/config_*.xml
 
 /themes/*/cache/*
-/themes/*/assets/cache
+/themes/*/assets/cache/*
+!/themes/*/assets/cache/index.php
 /themes/*/config/settings_*.json
 
 /img/*
