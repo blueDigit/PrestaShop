@@ -664,6 +664,8 @@ class WebserviceOutputBuilderCore
                         $value = null;
                         if (!empty($object_assoc)) {
                             $value = $object_assoc;
+                        } else {
+                            $value = ['id' => ''];
                         }
                         if (empty($fields_assoc)) {
                             $fields_assoc = [['id' => $value['id']]];
@@ -716,7 +718,7 @@ class WebserviceOutputBuilderCore
                     $field['value'] = $object_assoc['id'];
                 } elseif (!isset($field['sqlId'])) {
                     $field['sqlId'] = $field_name;
-                    $field['value'] = $object_assoc[$field_name];
+                    $field['value'] = $object_assoc[$field_name] ?? '';
                 }
                 $field['entities_name'] = $assoc_name;
                 $field['entity_name'] = $resource_name;
