@@ -141,7 +141,8 @@ class CustomerFormCore extends AbstractForm
         }
 
         $passwordField = $this->getField('password');
-        if ((!empty($passwordField->getValue()) || $this->passwordRequired)
+        if (!empty($passwordField)
+            && (!empty($passwordField->getValue()) || $this->passwordRequired)
             && Validate::isPasswd($passwordField->getValue()) === false) {
             $passwordField->addError($this->translator->trans(
                 'Password must be between 5 and 72 characters long',
