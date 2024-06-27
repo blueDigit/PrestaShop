@@ -85,10 +85,18 @@ class OrderConfirmationControllerCore extends FrontController
 
         $order = new Order(Order::getIdByCartId((int) ($this->id_cart)));
         $presentedOrder = $this->order_presenter->present($order);
-        $register_form = $this
-            ->makeCustomerForm()
-            ->setGuestAllowed(false)
-            ->fillWith(Tools::getAllValues());
+
+        $register_form = null;
+        if ($this->context->customer->is_guest) {
+            $register_form = $this
+                ->makeCustomerForm()
+                ->setGuestAllowed(false)
+                ->fillFromCustomer($this->context->customer)
+                ->setAction(
+                    $this->context->link->getPageLink('authentication', true)
+                )
+            ;
+        }
 
         parent::initContent();
 
