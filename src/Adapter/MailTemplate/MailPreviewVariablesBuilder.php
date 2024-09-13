@@ -40,6 +40,7 @@ use PrestaShop\PrestaShop\Core\MailTemplate\Layout\LayoutInterface;
 use Product;
 use Symfony\Component\Translation\TranslatorInterface;
 use Tools;
+use Hook;
 
 /**
  * Class MailPreviewVariablesBuilder is used to build fake (but realistic) template variables to preview email templates.
@@ -143,6 +144,11 @@ final class MailPreviewVariablesBuilder
         $templateVars['{history_url}'] = $this->context->link->getPageLink('history', true);
         $templateVars['{color}'] = $this->configuration->get('PS_MAIL_COLOR');
         $templateVars = array_merge($templateVars, $this->buildOrderVariables($mailLayout));
+
+        Hook::exec('actionBuildMailPreviewTemplateVariables', [
+            'mail_layout' => $mailLayout,
+            'template_vars' => &$templateVars,
+        ]);
 
         return $templateVars;
     }

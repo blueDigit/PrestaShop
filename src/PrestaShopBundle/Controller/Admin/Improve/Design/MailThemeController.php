@@ -41,6 +41,7 @@ use PrestaShop\PrestaShop\Core\MailTemplate\MailTemplateInterface;
 use PrestaShop\PrestaShop\Core\MailTemplate\MailTemplateRendererInterface;
 use PrestaShop\PrestaShop\Core\MailTemplate\ThemeCatalogInterface;
 use PrestaShop\PrestaShop\Core\MailTemplate\ThemeInterface;
+use PrestaShop\PrestaShop\Core\MailTemplate\Transformation\MailContentHooksTransformation;
 use PrestaShop\PrestaShop\Core\MailTemplate\Transformation\MailVariablesTransformation;
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use PrestaShopBundle\Form\Admin\Improve\Design\MailTheme\GenerateMailsType;
@@ -480,6 +481,9 @@ class MailThemeController extends FrameworkBundleAdminController
 
         /** @var MailTemplateRendererInterface $renderer */
         $renderer = $this->get('prestashop.core.mail_template.mail_template_renderer');
+        //Special case for preview, we execute the actionEmailAddBeforeContent and actionEmailAddAfterContent hooks
+        $renderer->addTransformation(new MailContentHooksTransformation(MailTemplateInterface::HTML_TYPE, $layout));
+        $renderer->addTransformation(new MailContentHooksTransformation(MailTemplateInterface::TXT_TYPE, $layout));
         //Special case for preview, we fill the mail variables
         $renderer->addTransformation(new MailVariablesTransformation(MailTemplateInterface::HTML_TYPE, $mailLayoutVariables));
         $renderer->addTransformation(new MailVariablesTransformation(MailTemplateInterface::TXT_TYPE, $mailLayoutVariables));
