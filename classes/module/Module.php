@@ -153,6 +153,9 @@ abstract class ModuleCore implements ModuleInterface
     /** @var array Array cache filled with modules informations */
     protected static $modules_cache;
 
+    /** @var bool */
+    protected static $modules_cached = false;
+
     /** @var array Array cache filled with modules instances */
     protected static $_INSTANCE = [];
 
@@ -326,21 +329,35 @@ abstract class ModuleCore implements ModuleInterface
 
         // If the module has the name we load the corresponding data from the cache
         if ($this->name != null) {
+            $noCache = !$this->context->controller instanceof Controller;
             // If cache is not generated, we generate it
-            if (static::$modules_cache == null && !is_array(static::$modules_cache)) {
+            if ($noCache || !static::$modules_cached) {
                 $id_shop = (Validate::isLoadedObject($this->context->shop) ? $this->context->shop->id : Configuration::get('PS_SHOP_DEFAULT'));
+                $moduleNames = [];
 
-                static::$modules_cache = [];
                 // Join clause is done to check if the module is activated in current shop context
                 $result = Db::getInstance()->executeS('
                 SELECT m.`id_module`, m.`name`, ms.`id_module`as `mshop`
                 FROM `' . _DB_PREFIX_ . 'module` m
                 LEFT JOIN `' . _DB_PREFIX_ . 'module_shop` ms
                 ON m.`id_module` = ms.`id_module`
-                AND ms.`id_shop` = ' . (int) $id_shop);
+                AND ms.`id_shop` = ' . (int) $id_shop . '
+                ' . ($noCache ? 'WHERE m.`name` = "'.Db::getInstance()->_escape($this->name).'"' : ''));
                 foreach ($result as $row) {
                     static::$modules_cache[$row['name']] = $row;
                     static::$modules_cache[$row['name']]['active'] = ($row['mshop'] > 0) ? 1 : 0;
+                    $moduleNames[] = $row['name'];
+                }
+
+                if ($noCache) {
+                    static::$modules_cached = false;
+                } else {
+                    foreach (array_keys(static::$modules_cache) as $name) {
+                        if (!in_array($name, $moduleNames)) {
+                            unset(static::$modules_cache[$name]);
+                        }
+                    }
+                    static::$modules_cached = true;
                 }
             }
 
@@ -355,9 +372,6 @@ abstract class ModuleCore implements ModuleInterface
                     }
                 }
                 $this->_path = __PS_BASE_URI__ . 'modules/' . $this->name . '/';
-            }
-            if (!$this->context->controller instanceof Controller) {
-                static::$modules_cache = null;
             }
             $this->local_path = _PS_MODULE_DIR_ . $this->name . '/';
         }
